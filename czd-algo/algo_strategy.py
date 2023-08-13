@@ -396,7 +396,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         detected_enemy_units_threshold = 8
         stall_turns = 1
         min_spam_scout_threshold = 5
-        def_spawn_loc = [23, 9]
+        def_spawn_loc = [22, 8]
+        # TODO: check if spawn loc has shit
         saved_mp = 2
 
         mobile_budget = game_state.get_resources()[1]
@@ -451,6 +452,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         else:
             if game_state.turn_number % 2 == 1:
+                gamelib.debug_write(f"(SKIPPING) SPAWN: SPAM_INTERCEPTER")
                 return
             
             # TODO: figure out where to spawn scouts + how many
