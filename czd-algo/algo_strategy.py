@@ -51,6 +51,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         MP = 1
         SP = 0
         # This is a good place to do initial setup
+        # TODO: debug config
 
     def on_turn(self, game_state):
         """
@@ -62,6 +63,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         game_state = gamelib.GameState(self.config, game_state)
         gamelib.debug_write(
+            # TODO: improve debug
             f"Performing turn {game_state.turn_number} of your custom algo strategy"
         )
         game_state.suppress_warnings(True)
@@ -85,7 +87,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
 
-        
         # Offense
         self.execute_offence(game_state)
 
@@ -135,10 +136,15 @@ class AlgoStrategy(gamelib.AlgoCore):
         We can track where the opponent scored by looking at events in action frames
         as shown in the on_action_frame function
         """
+        # TODO: improve reactive defense
         for location in self.scored_on_locations:
             # Build turret one space above so that it doesn't block our own edge spawn locations
             build_location = [location[0], location[1] + 1]
             game_state.attempt_spawn(TURRET, build_location)
+
+#######################################################################################################################
+########################################### Defence Helpers ###########################################################
+#######################################################################################################################
 
     def stall_with_interceptors(self, game_state):
         """
@@ -263,7 +269,11 @@ class AlgoStrategy(gamelib.AlgoCore):
                 gamelib.debug_write(
                     "All locations: {}".format(self.scored_on_locations)
                 )
-    
+
+#######################################################################################################################
+################################################### Offence ###########################################################
+#######################################################################################################################
+
     def execute_offence(self, game_state: gamelib.GameState):
         """
         Executes offence based on the current game state
@@ -299,6 +309,8 @@ class AlgoStrategy(gamelib.AlgoCore):
                 support_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
                 game_state.attempt_spawn(SUPPORT, support_locations)
 
+
+#######################################################################################################################
 
 if __name__ == "__main__":
     algo = AlgoStrategy()
