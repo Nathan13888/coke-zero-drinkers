@@ -93,16 +93,16 @@ class AlgoStrategy(gamelib.AlgoCore):
             (WALL, [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6]], "BUILD_UPGRADE"),
             (SUPPORT, [[20, 10]], "BUILD_UPGRADE"),
             (TURRET, [[20, 8], [25, 13]], "BUILD_UPGRADE"),
-            # Build final upgrades
+            # Build and upgrade final upgrades
             (TURRET, [[23, 9]] , "BUILD"),
-            (SUPPORT, [[19, 7], [26, 12], [18, 6]], "BUILD"),
+            (TURRET, [[23, 9]] , "BUILD_UPGRADE"),
+            (SUPPORT, [[19, 7], [26, 12], [18, 6], [22, 12], [23, 11]], "BUILD"),
             (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD"),
             (TURRET, [[21, 12]], "BUILD"),
-            # Upgrade final upgrades
-            (TURRET, [[23, 9]] , "BUILD_UPGRADE"),
-            (SUPPORT, [[19, 7], [26, 12], [18, 6]], "BUILD_UPGRADE"),
-            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
             (TURRET, [[21, 12]], "BUILD_UPGRADE"),
+            (SUPPORT, [[19, 7], [26, 12], [18, 6], [22, 12], [23, 11]], "BUILD_UPGRADE"),
+            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
+            
             # Repair final upgrades
             # TODO
         ]
