@@ -72,6 +72,8 @@ class AlgoCore(object):
                     self.on_action_frame(game_state_string)
                 elif state_type == 2:
                     # This is the end game message. This means the game is over so break and finish the program.
+                    # TODO: custom end game handling
+                    # TODO: debug avg move time, etc
                     debug_write("Got end state, game over. Stopping algo.")
                     break
                 else:
