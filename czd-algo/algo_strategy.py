@@ -110,15 +110,20 @@ class AlgoStrategy(gamelib.AlgoCore):
         # More community tools available at: https://terminal.c1games.com/rules#Download
 
         # Place turrets that attack enemy units
-        turret_locations = [[0, 13], [27, 13], [8, 11], [19, 11], [13, 11], [14, 11]]
+        turret_locations = [[2, 12], [7, 9], [12, 7],
+                            [20, 9], [25, 12]]
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
         game_state.attempt_spawn(TURRET, turret_locations)
         
         # Place walls in front of turrets to soak up damage for them
-        wall_locations = [[8, 12], [19, 12]]
+        wall_locations = [[2, 13], [3, 12], [4, 11], [5, 10], 
+                          [7, 10], [8, 9], [9, 8], [10, 7], 
+                          [12, 8], [13, 8], [14, 8], [15, 8], 
+                          [17, 7], [18, 8], [19, 9], [20, 10],
+                          [22, 10], [23, 11], [24, 12], [25, 13]]
         game_state.attempt_spawn(WALL, wall_locations)
         # upgrade walls so they soak more damage
-        game_state.attempt_upgrade(wall_locations)
+        # game_state.attempt_upgrade(wall_locations)
 
     def build_reactive_defense(self, game_state):
         """
