@@ -4,6 +4,8 @@ import json
 import os
 import sys
 
+from typing import List, Tuple, Any, Literal
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # pylint: disable=wrong-import-position
 # pylint: disable=E0401
@@ -33,6 +35,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write("Random seed: {}".format(seed))
 
         self.scored_on_locations = []
+        self.development_plan: List[Tuple[Any, List[List[int]], Literal["BUILD", "BUILD_UPGRADE", "REFUND"]]] = []
 
     def on_game_start(self, config):
         """
@@ -42,12 +45,13 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.config = config
         # pylint: disable=W0601
         global WALL, SUPPORT, TURRET, SCOUT, DEMOLISHER, INTERCEPTOR, MP, SP
-        WALL = config["unitInformation"][0]["shorthand"]
-        SUPPORT = config["unitInformation"][1]["shorthand"]
-        TURRET = config["unitInformation"][2]["shorthand"]
-        SCOUT = config["unitInformation"][3]["shorthand"]
-        DEMOLISHER = config["unitInformation"][4]["shorthand"]
-        INTERCEPTOR = config["unitInformation"][5]["shorthand"]
+        WALL = config["unitInformation"][0]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        SUPPORT = config["unitInformation"][1]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        TURRET = config["unitInformation"][2]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        SCOUT = config["unitInformation"][3]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        DEMOLISHER = config["unitInformation"][4]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        INTERCEPTOR = config["unitInformation"][5]["shorthand"] # pyright: ignore[reportGeneralTypeIssues]
+        
         MP = 1
         SP = 0
 
@@ -60,6 +64,50 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write(f"DEMOLISHER: {DEMOLISHER}")
         gamelib.debug_write(f"INTERCEPTOR: {INTERCEPTOR}")
 
+        # Walls of initial structure
+        initial_walls = [[0, 13], [1, 13], [3, 13], [23, 13], [25, 13], [26, 13], [27, 13], [1, 12], [23, 12], [2, 11], [3, 10], [21, 10], [4, 9], [20, 9], [5, 8], [19, 8], [6, 7], [18, 7], [7, 6], [17, 6], [8, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [9, 4]]
+        # Upgraded turrets of initial structure
+        initial_upgraded_turrets = [[2, 13], [19,7]]
+        # Turrets of initial structure
+        initial_turrets = [[24, 13], [24, 12], [25, 12], [21, 9], [20, 8]]
+
+        # Threshold to refund damaged walls in percentage TODO
+        # damaged_wall_threshold = 50 # 50%
+
+        # Plan for structures
+        self.development_plan = [
+            # Build initial structure
+            (WALL, initial_walls, "BUILD"),
+            (TURRET, initial_upgraded_turrets, "BUILD"),
+            (TURRET, initial_turrets, "BUILD"),
+            (TURRET, initial_upgraded_turrets, "BUILD_UPGRADE"),
+            # Repair initial structure
+            # TODO
+            # Upgrade initial structure
+            (SUPPORT, [[25, 12]], "BUILD_UPGRADE"),
+            (TURRET, [[24, 12], [21, 9]], "BUILD_UPGRADE"),
+            (TURRET, [[2, 13]], "BUILD_UPGRADE"),
+            (WALL, [[23, 13], [23, 12], [3, 13]], "BUILD_UPGRADE"),
+            (WALL, [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6]], "BUILD_UPGRADE"),
+            (SUPPORT, [[20, 10]], "BUILD_UPGRADE"),
+            (TURRET, [[20, 8], [25, 13]], "BUILD_UPGRADE"),
+            # Build final upgrades
+            (TURRET, [[23, 9]] , "BUILD"),
+            (SUPPORT, [[19, 7], [26, 12], [18, 6]], "BUILD"),
+            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD"),
+            (TURRET, [[21, 12]], "BUILD"),
+            # Upgrade final upgrades
+            (TURRET, [[23, 9]] , "BUILD_UPGRADE"),
+            (SUPPORT, [[19, 7], [26, 12], [18, 6]], "BUILD_UPGRADE"),
+            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
+            (TURRET, [[21, 12]], "BUILD_UPGRADE"),
+            # Repair final upgrades
+            # TODO
+        ]
+
+        gamelib.debug_write("DEVELOPMENT PLAN")
+        gamelib.debug_write(self.development_plan)
+
     def on_turn(self, game_state):
         """
         This function is called every turn with the game state wrapper as
@@ -70,7 +118,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         game_state = gamelib.GameState(self.config, game_state)
         gamelib.debug_write(
-            # TODO: improve debug
             f"Performing turn {game_state.turn_number} of your custom algo strategy"
         )
         game_state.suppress_warnings(True)
@@ -79,7 +126,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         game_state.submit_turn()
 
-    def strategy(self, game_state):
+    def strategy(self, game_state: gamelib.GameState):
         """
         For defense we will use a spread out layout and some interceptors early on.
         We will place turrets near locations the opponent managed to score on.
@@ -88,62 +135,84 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
 
         # Defence
-
-        # First, place basic defenses
         self.build_defences(game_state)
-        # Now build reactive defenses based on where the enemy scored
-        self.build_reactive_defense(game_state)
 
-        # Offense
+        # Offence
         self.execute_offence(game_state)
 
-    def build_defences(self, game_state):
+    def build_defences(self, game_state: gamelib.GameState):
         """
-        Build basic defenses using hardcoded locations.
-        Remember to defend corners and avoid placing units in the front where enemy demolishers can attack them.
+        Builds defences that are predetermined and preemptively placed
         """
         # Useful tool for setting up your base locations: https://www.kevinbai.design/terminal-map-maker
         # More community tools available at: https://terminal.c1games.com/rules#Download
-        # TODO: Alina; Update turret and wall locations
-        # Place turrets that attack enemy units
-        turret_locations = [[2, 12], [7, 9], [12, 7], [20, 9], [25, 12]]
-        # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
-        game_state.attempt_spawn(TURRET, turret_locations)
+        
+        # Only build defences after turn 1, skipping turn 0
+        if game_state.turn_number >= 1:
+            # Build basic defenses using hardcoded locations.
+            # Remember to defend corners and avoid placing units in the front where enemy demolishers can attack them.
+            
+            # Execute development plan
+            for structure, points, action in self.development_plan:
+                if action == 'BUILD':
+                    build_count = game_state.attempt_spawn(structure, points)
+                    if build_count is None or build_count < len(points):
+                        gamelib.debug_write(f"Not enough or failed to build {structure} at all of {points} ({build_count}).")
+                        break
+                elif action == 'BUILD_UPGRADE':
+                    build_count = game_state.attempt_spawn(structure, points)
+                    if build_count is None or build_count < len(points):
+                        gamelib.debug_write(f"Not enough or failed to build {structure} at all of {points} ({build_count}).")
+                        break
+                    upgrade_count = game_state.attempt_upgrade(points)
+                    if upgrade_count is None or upgrade_count < len(points):
+                        gamelib.debug_write(f"Not enough or failed to upgrade {structure} at all of {points} ({upgrade_count}).")
+                        break
+                else:
+                    # Refund means delete if it's below certain threshold and rebuild (only if you could afford it)
+                    # TODO
+                    gamelib.debug_write("WARNING: Refund not implemented yet.")
 
-        # Place walls in front of turrets to soak up damage for them
-        wall_locations = [
-            [2, 13],
-            [3, 12],
-            [4, 11],
-            [5, 10],
-            [7, 10],
-            [8, 9],
-            [9, 8],
-            [10, 7],
-            [12, 8],
-            [13, 8],
-            [14, 8],
-            [15, 8],
-            [17, 7],
-            [18, 8],
-            [19, 9],
-            [20, 10],
-            [22, 10],
-            [23, 11],
-            [24, 12],
-            [25, 13],
-        ]
-        game_state.attempt_spawn(WALL, wall_locations)
-        # upgrade walls so they soak more damage
-        # game_state.attempt_upgrade(wall_locations)
 
-    def build_reactive_defense(self, game_state):
+            # # Build walls
+            # built_wall = game_state.attempt_spawn(WALL, self.pink_filters_points)
+            # # Build turrets
+            # built_upgraded_turrets = game_state.attempt_spawn(TURRET, self.blue_destructors_points)
+            # built_turrets = game_state.attempt_spawn(TURRET, self.pink_destructors_points)
+            # # Upgrade turrets
+            # upgraded_upgraded_turrets = game_state.attempt_upgrade(self.blue_destructors_points)
+
+            # gamelib.debug_write(f"Built {built_wall} walls.")
+            # gamelib.debug_write(f"Built {built_upgraded_turrets} upgraded turrets.")
+            # gamelib.debug_write(f"Built {built_turrets} turrets.")
+            # gamelib.debug_write(f"Upgraded {upgraded_upgraded_turrets} upgraded turrets.")
+
+            # Continue building if there are still SP resources
+            # if game_state.get_resource(SP) > 0:
+
+            # TODO
+
+            # Build initial structure
+
+            # Repair initial structure
+
+            # Upgrade structure
+
+
+
+            # game_state.attempt_spawn(TURRET, turret_locations)
+
+            # self.build_reactive_defence(game_state)
+        
+            # TODO: Delete structures to get back points
+
+    def build_reactive_defence(self, game_state: gamelib.GameState):
         """
         This function builds reactive defenses based on where the enemy scored on us from.
         We can track where the opponent scored by looking at events in action frames
         as shown in the on_action_frame function
         """
-        # TODO: improve reactive defense
+        # TODO: Add debug traces
         for location in self.scored_on_locations:
             # Build turret one space above so that it doesn't block our own edge spawn locations
             build_location = [location[0], location[1] + 1]
@@ -153,12 +222,13 @@ class AlgoStrategy(gamelib.AlgoCore):
 ########################################### Defence Helpers ###########################################################
 #######################################################################################################################
 
-    def stall_with_interceptors(self, game_state):
+    def stall_with_interceptors(self, game_state: gamelib.GameState):
         """
         Send out interceptors at random locations to defend our base from enemy moving units.
         """
         # We can spawn moving units on our edges so a list of all our edge locations
-        friendly_edges = game_state.game_map.get_edge_locations(
+        # pyright: ignore[reportGeneralTypeIssues]
+        friendly_edges = game_state.game_map.get_edge_locations( # pyright: ignore[reportGeneralTypeIssues]
             game_state.game_map.BOTTOM_LEFT
         ) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
 
@@ -180,7 +250,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             # We don't have to remove the location since multiple mobile 
             # units can occupy the same space.
 
-    def demolisher_line_strategy(self, game_state):
+    def demolisher_line_strategy(self, game_state: gamelib.GameState):
         """
         Build a line of the cheapest stationary unit so our demolisher can attack from long range.
         """
@@ -276,6 +346,43 @@ class AlgoStrategy(gamelib.AlgoCore):
                 gamelib.debug_write(
                     "All locations: {}".format(self.scored_on_locations)
                 )
+    
+    def build_preemptive_defense(self, game_state: gamelib.GameState):
+        """
+        Simulates every single possible path an enemy could take if they used all scouts,
+        interceptors, or demolisher and determine the paths they traversed the most.
+        """
+        # Dictionary to store the frequency of each path
+        path_frequency = {}
+
+        # Define the enemy unit types to simulate
+        # enemy_unit_types = [game_state.SCOUT, game_state.DEMOLISHER, game_state.INTERCEPTOR]
+
+        # Iterate through each enemy unit type
+
+        for x in range(game_state.ARENA_SIZE):
+            start_location = (x, game_state.ARENA_SIZE - 1)  # Assuming enemy spawns at the top edge
+            target_edge = game_state.get_target_edge(start_location)
+
+            # Get the path the unit would take
+            path = game_state.find_path_to_edge(start_location, target_edge)
+
+            if path is not None:
+                # Increment the frequency count for each location in the path
+                for location in path:
+                    if location in path_frequency:
+                        path_frequency[location] += 1
+                    else:
+                        path_frequency[location] = 1
+
+        # Find the most frequently traversed locations
+        most_traversed_locations = sorted(path_frequency, key=path_frequency.get, reverse=True)
+
+        # Build TURRET or other defensive structures at the most traversed locations
+        for location in most_traversed_locations[:5]: # Adjust the number of locations as needed
+            if game_state.can_spawn(game_state.TURRET, location):
+                game_state.attempt_spawn(game_state.TURRET, location)
+
 
 #######################################################################################################################
 ################################################### Offence ###########################################################
