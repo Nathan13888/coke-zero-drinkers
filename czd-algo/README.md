@@ -1,5 +1,11 @@
 # Starter Algo
 
+## Getting Started
+
+Contribute to strategy: `algo_strategy.py`
+Upload to Terminal: <https://terminal.c1games.com/myalgos>
+Rules: <https://terminal.c1games.com/rules>
+
 ## File Overview
 
 ```
@@ -21,11 +27,6 @@ starter-algo
  ├──run.ps1
  └──run.sh
 ```
-
-### Creating an Algo
-
-To create an algo, simply modify the `algo_strategy.py` file. 
-To upload to terminal, upload the entire python-algo folder.
 
 ### `algo_strategy.py`
 
