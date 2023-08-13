@@ -397,10 +397,14 @@ class AlgoStrategy(gamelib.AlgoCore):
         stall_turns = 1
         min_spam_scout_threshold = 5
         def_spawn_loc = [23, 9]
+        saved_mp = 2
 
         mobile_budget = game_state.get_resources()[1]
         opponent_sp = game_state.get_resources(player_index=1)[0]
         opp_sp_min_threshold = 8
+
+
+        gamelib.debug_write(f"BUDGET: MOBILE_POINTS, {mobile_budget} points")
 
         ######################################
 
@@ -446,10 +450,12 @@ class AlgoStrategy(gamelib.AlgoCore):
             gamelib.debug_write(f"SPAWN: SPAM_SCOUT, {count} count")
 
         else:
+            if game_state.turn_number % 2 == 1:
+                return
+            
             # TODO: figure out where to spawn scouts + how many
             # game_state.config["unitInformation"][5]["cost2"]
             cost_of_intercepter = 2 # TODO: get from config
-            saved_mp = 5
             count = int((mobile_budget - saved_mp) / cost_of_intercepter) # max number of scouts to spawn per push
             
             game_state.attempt_spawn(INTERCEPTOR, def_spawn_loc, count)
