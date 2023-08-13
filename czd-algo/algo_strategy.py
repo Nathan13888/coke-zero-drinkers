@@ -50,8 +50,15 @@ class AlgoStrategy(gamelib.AlgoCore):
         INTERCEPTOR = config["unitInformation"][5]["shorthand"]
         MP = 1
         SP = 0
-        # This is a good place to do initial setup
-        # TODO: debug config
+
+        # Log configs
+        gamelib.debug_write("CONFIGS")
+        gamelib.debug_write(f"WALL: {WALL}")
+        gamelib.debug_write(f"SUPPORT: {SUPPORT}")
+        gamelib.debug_write(f"TURRET: {TURRET}")
+        gamelib.debug_write(f"SCOUT: {SCOUT}")
+        gamelib.debug_write(f"DEMOLISHER: {DEMOLISHER}")
+        gamelib.debug_write(f"INTERCEPTOR: {INTERCEPTOR}")
 
     def on_turn(self, game_state):
         """
