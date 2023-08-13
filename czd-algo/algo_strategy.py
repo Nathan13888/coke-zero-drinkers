@@ -394,8 +394,9 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # TUNABlES
         detected_enemy_units_threshold = 8
-        stall_turns = 2
+        stall_turns = 1
         min_spam_scout_threshold = 5
+        def_spawn_loc = [23, 9]
 
         mobile_budget = game_state.get_resources()[1]
         opponent_sp = game_state.get_resources(player_index=1)[0]
@@ -418,7 +419,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         
 
         # TODO: consider all paths to spawn
-        def_spawn_loc = [14+12, 12]
 
         if ( # they are vulnerable??
             # if they have fewer than the threshold number of structures
