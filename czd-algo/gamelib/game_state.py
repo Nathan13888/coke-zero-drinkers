@@ -7,6 +7,8 @@ from .util import send_command, debug_write
 from .unit import GameUnit
 from .game_map import GameMap
 
+from typing import List
+
 def is_stationary(unit_type):
     """
         Args:
@@ -16,6 +18,9 @@ def is_stationary(unit_type):
             Boolean, True if the unit is stationary, False otherwise.
     """
     return unit_type in STRUCTURE_TYPES
+
+# UNIT_TYPE_TO_INDEX = {}
+# WALL = SUPPORT = TURRET = SCOUT = DEMOLISHER = INTERCEPTOR = REMOVE = UPGRADE = None
 
 class GameState:
     """Represents the entire gamestate for a given turn
@@ -353,7 +358,7 @@ class GameState:
                 (stationary or on_edge) and
                 (not stationary or num == 1))
 
-    def attempt_spawn(self, unit_type, locations, num=1):
+    def attempt_spawn(self, unit_type, locations: List[List], num=1):
         """Attempts to spawn new units with the type given in the given locations.
 
         Args:
