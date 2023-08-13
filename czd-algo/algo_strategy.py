@@ -66,12 +66,24 @@ class AlgoStrategy(gamelib.AlgoCore):
         # This is a good place to do initial setup
         # TODO: ascii art - https://emojicombos.com/coca-cola-zero
 
+        ###############################################
+
         # Walls of initial structure
-        initial_walls = [[0, 13], [1, 13], [3, 13], [23, 13], [25, 13], [26, 13], [27, 13], [1, 12], [23, 12], [2, 11], [3, 10], [21, 10], [4, 9], [20, 9], [5, 8], [19, 8], [6, 7], [18, 7], [7, 6], [17, 6], [8, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [9, 4]]
+        left_ledge = [[0, 13], [1, 13], [3, 13]] # LEFT FRONT
+        right_ledge = [[22, 13], [23, 13], [24, 13], [25, 13], [26, 13], [27, 13]] # RIGHT FRONT
+        left_flank = [[1, 12], [2, 12], [3, 11], [4, 10], [5, 9], [6, 8], [7, 7]] # LEFT WALL
+        right_flank = [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6], [8, 6]] # RIGHT WALL
+        belly = [[9, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5]] # BOTTOM FLAT PART
+        initial_walls = [*left_ledge, *right_ledge, *left_flank, *belly, *right_flank]
+        # TODO: Flank walls
+        # flank_walls = [[x + 19, 13] for x in range(4)]
+
         # Upgraded turrets of initial structure
-        initial_upgraded_turrets = [[2, 13], [19,7]]
+        initial_upgraded_turrets = [[2, 13], [22, 10]]
         # Turrets of initial structure
-        initial_turrets = [[24, 13], [24, 12], [25, 12], [21, 9], [20, 8]]
+        initial_turrets = [[23, 12], [24, 12], [25, 12], [21, 9], [20, 8]]
+        surround1_turrets = [[2, 11], [18, 6], [4, 9], [16, 4], [6, 7], [8, 5]]
+        surround2_turrets = [[10, 4], [14, 4], [12, 4]]
 
         # Threshold to refund damaged walls in percentage TODO
         # damaged_wall_threshold = 50 # 50%
@@ -83,28 +95,28 @@ class AlgoStrategy(gamelib.AlgoCore):
             (TURRET, initial_upgraded_turrets, "BUILD"),
             (TURRET, initial_turrets, "BUILD"),
             (TURRET, initial_upgraded_turrets, "BUILD_UPGRADE"),
-            # Repair initial structure
-            # TODO
+            (SUPPORT, [[24, 11]], "BUILD"),
+
             # Upgrade initial structure
-            (SUPPORT, [[25, 12]], "BUILD_UPGRADE"),
-            (TURRET, [[24, 12], [21, 9]], "BUILD_UPGRADE"),
-            (TURRET, [[2, 13]], "BUILD_UPGRADE"),
-            (WALL, [[23, 13], [23, 12], [3, 13]], "BUILD_UPGRADE"),
+            (TURRET, initial_turrets, "BUILD_UPGRADE"),
+            (WALL, right_ledge, "BUILD_UPGRADE"),
+            (SUPPORT, [[24, 11]], "BUILD_UPGRADE"),
+            (SUPPORT, [[24, 10]], "BUILD_UPGRADE"),
+            # TODO: flank (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
+
+            # Late game (lots of resources)
+            (WALL, [[23, 13], [24, 13], [3, 13]], "BUILD_UPGRADE"),
             (WALL, [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6]], "BUILD_UPGRADE"),
             (SUPPORT, [[20, 10]], "BUILD_UPGRADE"),
             (TURRET, [[20, 8], [25, 13]], "BUILD_UPGRADE"),
+
             # Build and upgrade final upgrades
-            (TURRET, [[23, 9]] , "BUILD"),
-            (TURRET, [[23, 9]] , "BUILD_UPGRADE"),
-            (SUPPORT, [[19, 7], [26, 12], [18, 6], [22, 12], [23, 11]], "BUILD"),
+            (SUPPORT, [[19, 7]], "BUILD_UPGRADE"),
             (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD"),
-            (TURRET, [[21, 12]], "BUILD"),
-            (TURRET, [[21, 12]], "BUILD_UPGRADE"),
-            (SUPPORT, [[19, 7], [26, 12], [18, 6], [22, 12], [23, 11]], "BUILD_UPGRADE"),
-            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
-            
-            # Repair final upgrades
-            # TODO
+            (TURRET, surround1_turrets, "BUILD"),
+            (TURRET, surround2_turrets, "BUILD"),
+            (TURRET, surround1_turrets, "BUILD_UPGRADES"),
+            (TURRET, surround2_turrets, "BUILD_UPGRADES"),
         ]
 
         gamelib.debug_write("DEVELOPMENT PLAN")
@@ -404,7 +416,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         opponent_sp = game_state.get_resources(player_index=1)[0]
         opp_sp_min_threshold = 8
 
-
         gamelib.debug_write(f"BUDGET: MOBILE_POINTS, {mobile_budget} points")
 
         ######################################
@@ -464,12 +475,18 @@ class AlgoStrategy(gamelib.AlgoCore):
             game_state.attempt_spawn(DEMOLISHER, def_spawn_loc, count)
 
             gamelib.debug_write(f"SPAWN: SPAM_DEMOLISHER, {count} count")
+        
         # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
         # - spawn scouts every odd turn
         # - spam to protect self
+        cost_of_interceptor = 2 # TODO: get from config
+
+        mid_spawn_loc = [20, 6]
         rear_spawn_loc = [18, 4]
-        game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp)
-        # cost_of_interceptor = 2 # TODO: get from config
+
+        game_state.attempt_spawn(INTERCEPTOR, mid_spawn_loc, 1)
+        game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp - cost_of_interceptor)
+        
 
 
 
