@@ -160,18 +160,12 @@ class AlgoStrategy(gamelib.AlgoCore):
             for structure, points, action in self.development_plan:
                 if action == 'BUILD':
                     build_count = game_state.attempt_spawn(structure, points)
-                    if build_count is None or build_count < len(points):
-                        gamelib.debug_write(f"Not enough or failed to build {structure} at all of {points} ({build_count}).")
-                        break
+                    gamelib.debug_write(f"Built {build_count} {structure} at {points}.")
                 elif action == 'BUILD_UPGRADE':
                     build_count = game_state.attempt_spawn(structure, points)
-                    if build_count is None or build_count < len(points):
-                        gamelib.debug_write(f"Not enough or failed to build {structure} at all of {points} ({build_count}).")
-                        break
+                    gamelib.debug_write(f"Built {build_count} {structure} at {points}.")
                     upgrade_count = game_state.attempt_upgrade(points)
-                    if upgrade_count is None or upgrade_count < len(points):
-                        gamelib.debug_write(f"Not enough or failed to upgrade {structure} at all of {points} ({upgrade_count}).")
-                        break
+                    gamelib.debug_write(f"Upgraded {upgrade_count} {structure} at {points}.")
                 else:
                     # Refund means delete if it's below certain threshold and rebuild (only if you could afford it)
                     # TODO
