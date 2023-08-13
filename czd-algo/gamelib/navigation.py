@@ -20,13 +20,12 @@ class Node:
         self.blocked = False
         self.pathlength = -1
 
-"""
-This class helps with pathfinding. We guarantee the results will
-be accurate, but top players may want to write their own pathfinding
-code to maximise time efficiency
-"""
 class ShortestPathFinder:
-    """Handles pathfinding
+    """
+    This class helps with pathfinding. We guarantee the results will
+    be accurate, but top players may want to write their own pathfinding
+    code to maximise time efficiency
+    Handles pathfinding
 
     Attributes :
         * HORIZONTAL (int): A constant representing a horizontal movement
@@ -37,6 +36,7 @@ class ShortestPathFinder:
 
     """
     def __init__(self):
+        # pylint: disable=invalid-name
         self.HORIZONTAL = 1
         self.VERTICAL = 2
         self.initialized = False
@@ -49,6 +49,7 @@ class ShortestPathFinder:
         """
         #Initialize map 
         self.initialized = True
+        # pylint: disable=attribute-defined-outside-init
         self.game_state = game_state
         self.game_map = [[Node() for x in range(self.game_state.ARENA_SIZE)] for y in range(self.game_state.ARENA_SIZE)]
 
@@ -167,10 +168,10 @@ class ShortestPathFinder:
         current = queue.Queue()
         if ideal_tile in end_points:
             for location in end_points:
-               current.put(location)
-               #Set current pathlength to 0
-               self.game_map[location[0]][location[1]].pathlength = 0
-               self.game_map[location[0]][location[1]].visited_validate = True
+                current.put(location)
+                #Set current pathlength to 0
+                self.game_map[location[0]][location[1]].pathlength = 0
+                self.game_map[location[0]][location[1]].visited_validate = True
         else:
             current.put(ideal_tile)
             self.game_map[ideal_tile[0]][ideal_tile[1]].pathlength = 0
@@ -181,7 +182,9 @@ class ShortestPathFinder:
             current_location = current.get()
             current_node = self.game_map[current_location[0]][current_location[1]]
             for neighbor in self._get_neighbors(current_location):
-                if not self.game_state.game_map.in_arena_bounds(neighbor) or self.game_map[neighbor[0]][neighbor[1]].blocked:
+                if (not self.game_state.game_map.in_arena_bounds(neighbor)
+                    or self.game_map[neighbor[0]][neighbor[1]].blocked
+                ):
                     continue
 
                 neighbor_node = self.game_map[neighbor[0]][neighbor[1]]
@@ -204,7 +207,8 @@ class ShortestPathFinder:
         move_direction = 0
 
         while not self.game_map[current[0]][current[1]].pathlength == 0:
-            #debug_write("current tile {} has cost {}".format(current, self.game_map[current[0]][current[1]].pathlength))
+            # debug_write("current tile {} has cost {}"
+            #     .format(current, self.game_map[current[0]][current[1]].pathlength))
             next_move = self._choose_next_move(current, move_direction, end_points)
             #debug_write(next_move)
 
