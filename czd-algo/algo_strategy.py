@@ -394,7 +394,8 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # TUNABlES
         detected_enemy_units_threshold = 8
-        stall_turns = 5
+        stall_turns = 2
+        min_spam_scout_threshold = 5
 
         mobile_budget = game_state.get_resources()[1]
         opponent_sp = game_state.get_resources(player_index=1)[0]
@@ -410,12 +411,14 @@ class AlgoStrategy(gamelib.AlgoCore):
             
             random_locations = [[13, 0], [14, 0], [0, 13], [27, 13]]
             random_location = random.choice(random_locations)
-            game_state.attempt_spawn(SCOUT, random_location, 1000)
+            count = int(mobile_budget)
+            game_state.attempt_spawn(SCOUT, random_location, count)
+            gamelib.debug_write(f"SPAWN: STALLING, SPAM_SCOUT, {count} count")
             return
         
 
         # TODO: consider all paths to spawn
-        mp_spawn_location = [14+12, 12]
+        def_spawn_loc = [14+12, 12]
 
         if ( # they are vulnerable??
             # if they have fewer than the threshold number of structures
@@ -430,25 +433,28 @@ class AlgoStrategy(gamelib.AlgoCore):
             #     valid_x=[x for x in range(14)],
             #     valid_y=[y+14 for y in range(14)],
             # )
-            > detected_enemy_units_threshold
-            or opponent_sp < opp_sp_min_threshold
+            < detected_enemy_units_threshold
+            and mobile_budget >= min_spam_scout_threshold
+            and opponent_sp < opp_sp_min_threshold
         ):
 
             # TODO: sort out demolisher_line_strategy
             # self.demolisher_line_strategy(game_state)
             # TODO: "stage" an attack, require support, place intercepters in front?
-            game_state.attempt_spawn(SCOUT, mp_spawn_location, 1000)
+            count = int(mobile_budget)
+            game_state.attempt_spawn(SCOUT, def_spawn_loc, count)
+            gamelib.debug_write(f"SPAWN: SPAM_SCOUT, {count} count")
 
         else:
-
             # TODO: figure out where to spawn scouts + how many
             # game_state.config["unitInformation"][5]["cost2"]
             cost_of_intercepter = 2 # TODO: get from config
             saved_mp = 5
             count = int((mobile_budget - saved_mp) / cost_of_intercepter) # max number of scouts to spawn per push
             
-            game_state.attempt_spawn(INTERCEPTOR, mp_spawn_location, count)
+            game_state.attempt_spawn(INTERCEPTOR, def_spawn_loc, count)
 
+            gamelib.debug_write(f"SPAWN: SPAM_INTERCEPTER, {count} count")
             # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
             # - spawn scouts every odd turn
             # - spam to protect self
