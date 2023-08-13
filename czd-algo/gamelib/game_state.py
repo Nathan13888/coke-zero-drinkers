@@ -81,6 +81,7 @@ class GameState:
         ALL_UNITS = [SCOUT, DEMOLISHER, INTERCEPTOR, WALL, SUPPORT, TURRET]
         STRUCTURE_TYPES = [WALL, SUPPORT, TURRET]
 
+        # pylint: disable=invalid-name
         self.ARENA_SIZE = 28
         self.HALF_ARENA = int(self.ARENA_SIZE / 2)
         self.MP = 1
