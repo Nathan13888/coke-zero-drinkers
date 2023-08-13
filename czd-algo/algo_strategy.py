@@ -398,7 +398,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         min_spam_scout_threshold = 5
         def_spawn_loc = [22, 8]
         # TODO: check if spawn loc has shit
-        saved_mp = 2
+        saved_mp = 4
 
         mobile_budget = game_state.get_resources()[1]
         opponent_sp = game_state.get_resources(player_index=1)[0]
@@ -451,28 +451,26 @@ class AlgoStrategy(gamelib.AlgoCore):
             gamelib.debug_write(f"SPAWN: SPAM_SCOUT, {count} count")
 
         else:
+            # TODO: detect if there's a path for SPAM_SCOUT
             if game_state.turn_number % 2 == 1:
-                gamelib.debug_write(f"(SKIPPING) SPAWN: SPAM_INTERCEPTER")
+                gamelib.debug_write("(SKIPPING) SPAWN")
                 return
             
             # TODO: figure out where to spawn scouts + how many
-            # game_state.config["unitInformation"][5]["cost2"]
-            cost_of_intercepter = 2 # TODO: get from config
-            count = int((mobile_budget - saved_mp) / cost_of_intercepter) # max number of scouts to spawn per push
+            # game_state.config["unitInformation"][4]["cost2"]
+            cost_of_demolisher = 3 # TODO: get from config
+            count = int((mobile_budget - saved_mp) / cost_of_demolisher) # max number of scouts to spawn per push
             
-            game_state.attempt_spawn(INTERCEPTOR, def_spawn_loc, count)
+            game_state.attempt_spawn(DEMOLISHER, def_spawn_loc, count)
 
-            gamelib.debug_write(f"SPAWN: SPAM_INTERCEPTER, {count} count")
-            # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
-            # - spawn scouts every odd turn
-            # - spam to protect self
-            # if game_state.turn_number % 2 == 1:
-                # To simplify we will just check sending them from back left and right
-                # scout_spawn_location_options = [[13, 0], [14, 0]]
-                # best_location = self.least_damage_spawn_location(
-                #     game_state, scout_spawn_location_options
-                # )
-                # game_state.attempt_spawn(SCOUT, best_location, 1000)
+            gamelib.debug_write(f"SPAWN: SPAM_DEMOLISHER, {count} count")
+        # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
+        # - spawn scouts every odd turn
+        # - spam to protect self
+        rear_spawn_loc = [18, 4]
+        game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp)
+        # cost_of_interceptor = 2 # TODO: get from config
+
 
 
 
