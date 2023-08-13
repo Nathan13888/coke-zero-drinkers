@@ -59,6 +59,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write(f"SCOUT: {SCOUT}")
         gamelib.debug_write(f"DEMOLISHER: {DEMOLISHER}")
         gamelib.debug_write(f"INTERCEPTOR: {INTERCEPTOR}")
+        # This is a good place to do initial setup
+        # TODO: ascii art - https://emojicombos.com/coca-cola-zero
 
     def on_turn(self, game_state):
         """
@@ -74,6 +76,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             f"Performing turn {game_state.turn_number} of your custom algo strategy"
         )
         game_state.suppress_warnings(True)
+
+        # TODO: cProfile, pstats
 
         self.strategy(game_state)
 
@@ -254,6 +258,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                 filtered.append(location)
         return filtered
 
+    # TODO: Justin what is this??
     def on_action_frame(self, turn_string: str):
         """
         This is the action frame of the game. This function could be called
@@ -285,6 +290,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         Executes offence based on the current game state
         """
+
+        # TODO: consider all paths to spawn
+        # all scounts, load of demolishers
 
         # If the turn is less than 5, stall with interceptors and wait to see enemy's base
         if game_state.turn_number < 5:
