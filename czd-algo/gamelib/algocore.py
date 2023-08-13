@@ -1,6 +1,6 @@
 import json
 
-from .game_state import GameState
+# from .game_state import GameState
 from .util import get_command, debug_write, BANNER_TEXT, send_command
 
 class AlgoCore(object):
@@ -15,7 +15,7 @@ class AlgoCore(object):
     def __init__(self):
         self.config = None
 
-    def on_game_start(self, config):
+    def on_game_start(self, config: str):
         """
         This function is called once at the start of the game. 
         By default, it just initializes the config. \n
@@ -23,7 +23,7 @@ class AlgoCore(object):
         """
         self.config = config
 
-    def on_turn(self, game_state):
+    def on_turn(self, game_state): # pylint: disable=unused-argument
         """
         This step function is called at the start of each turn.
         It is passed the current game state, which can be used to initiate a new GameState object. 
@@ -41,7 +41,6 @@ class AlgoCore(object):
         Each of these frames is sent to the algo in order. 
         They can be handled in this function. 
         """
-        pass
 
 
     def start(self):
@@ -58,38 +57,26 @@ class AlgoCore(object):
             # manually kill this Python program.
             game_state_string = get_command()
             if "replaySave" in game_state_string:
-                """
-                This means this must be the config file. So, load in the config file as a json and add it to your AlgoStrategy class.
-                """
+                # This means this must be the config file. So, load in the config file as a json and add it to your AlgoStrategy class.
                 parsed_config = json.loads(game_state_string)
                 self.on_game_start(parsed_config)
             elif "turnInfo" in game_state_string:
                 state = json.loads(game_state_string)
-                stateType = int(state.get("turnInfo")[0])
-                if stateType == 0:
-                    """
-                    This is the game turn game state message. Algo must now print to stdout 2 lines, one for build phase one for
-                    deploy phase. Printing is handled by the provided functions.
-                    """
+                state_type = int(state.get("turnInfo")[0])
+                if state_type == 0:
+                    # This is the game turn game state message. Algo must now print to stdout 2 lines, one for build phase one for
+                    # deploy phase. Printing is handled by the provided functions.
                     self.on_turn(game_state_string)
-                elif stateType == 1:
-                    """
-                    If stateType == 1, this game_state_string string represents a single frame of an action phase
-                    """
+                elif state_type == 1:
+                    # If stateType == 1, this game_state_string string represents a single frame of an action phase
                     self.on_action_frame(game_state_string)
-                elif stateType == 2:
-                    """
-                    This is the end game message. This means the game is over so break and finish the program.
-                    """
+                elif state_type == 2:
+                    # This is the end game message. This means the game is over so break and finish the program.
                     debug_write("Got end state, game over. Stopping algo.")
                     break
                 else:
-                    """
-                    Something is wrong? Received an incorrect or improperly formatted string.
-                    """
-                    debug_write("Got unexpected string with turnInfo: {}".format(game_state_string))
+                    # Something is wrong? Received an incorrect or improperly formatted string.
+                    debug_write(f"Got unexpected string with turnInfo: {game_state_string}")
             else:
-                """
-                Something is wrong? Received an incorrect or improperly formatted string.
-                """
-                debug_write("Got unexpected string : {}".format(game_state_string))
+                # Something is wrong? Received an incorrect or improperly formatted string.
+                debug_write(f"Got unexpected string : {game_state_string}")

@@ -192,6 +192,7 @@ class BasicTests(unittest.TestCase):
         state.suppress_warnings(True)
         return state
 
+    # pylint: disable=C0116
     def test_basic(self):
         self.assertEqual(True, True, "It's the end of the world as we know it, and I feel fine")
 
@@ -262,7 +263,8 @@ class BasicTests(unittest.TestCase):
         game.game_map.add_unit("FF", [14,13], 1)
         got_string = str(game.game_map[14,13][0])
         expected_string = "Enemy FF, health: 75.0 location: [14, 13] removal:  upgrade: False "
-        self.assertEqual(got_string, expected_string, "Expected {} from print_unit test got {} ".format(expected_string, got_string))
+        self.assertEqual(got_string, expected_string,
+                         "Expected {expected_string} from print_unit test got {got_string} ")
 
     def test_future_MP(self):
         game = self.make_turn_0_map()
@@ -273,5 +275,5 @@ class BasicTests(unittest.TestCase):
 
     def future_turn_testing_function(self, game, expected, turns):
         actual = game.project_future_MP(turns)
-        self.assertAlmostEqual(actual, expected, 0, "Expected {} MP {} turns from now, got {}".format(expected, turns, actual))
-
+        self.assertAlmostEqual(actual, expected, 0,
+                               f"Expected {expected} MP {turns} turns from now, got {actual}")

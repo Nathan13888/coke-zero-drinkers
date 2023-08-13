@@ -62,9 +62,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         game_state = gamelib.GameState(self.config, game_state)
         gamelib.debug_write(
-            "Performing turn {} of your custom algo strategy".format(
-                game_state.turn_number
-            )
+            f"Performing turn {game_state.turn_number} of your custom algo strategy"
         )
         game_state.suppress_warnings(True)
 
@@ -127,7 +125,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         # Useful tool for setting up your base locations: https://www.kevinbai.design/terminal-map-maker
         # More community tools available at: https://terminal.c1games.com/rules#Download
-
+        # TODO: Alina; Update turret and wall locations
         # Place turrets that attack enemy units
         turret_locations = [[2, 12], [7, 9], [12, 7], [20, 9], [25, 12]]
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there

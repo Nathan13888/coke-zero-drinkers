@@ -29,6 +29,7 @@ class GameMap:
         """
         self.config = config
         self.enable_warnings = True
+        # pylint: disable=invalid-name
         self.ARENA_SIZE = 28
         self.HALF_ARENA = int(self.ARENA_SIZE / 2)
         self.TOP_RIGHT = 0
@@ -45,7 +46,7 @@ class GameMap:
         self._invalid_coordinates(location)
 
     def __setitem__(self, location, val):
-        if type(location) == tuple and len(location) == 2 and self.in_arena_bounds(location):
+        if isinstance(location, tuple) and len(location) == 2 and self.in_arena_bounds(location):
             self.__map[location[0]][location[1]] = val
             return
         self._invalid_coordinates(location)
@@ -76,7 +77,7 @@ class GameMap:
         return grid
 
     def _invalid_coordinates(self, location):
-        self.warn("{} is out of bounds.".format(str(location)))
+        self.warn(f"{str(location)} is out of bounds.")
 
     def in_arena_bounds(self, location):
         """Checks if the given location is inside the diamond shaped game board.
@@ -114,7 +115,10 @@ class GameMap:
 
         """
         if not quadrant_description in [self.TOP_LEFT, self.TOP_RIGHT, self.BOTTOM_LEFT, self.BOTTOM_RIGHT]:
-            self.warn("Passed invalid quadrant_description '{}'. See the documentation for valid inputs for get_edge_locations.".format(quadrant_description))
+            self.warn(
+                f"""Passed invalid quadrant_description '{quadrant_description}'.
+                See the documentation for valid inputs for get_edge_locations."""
+            )
             return
 
         edges = self.get_edges()
@@ -200,7 +204,10 @@ class GameMap:
 
         """
         if radius < 0 or radius > self.ARENA_SIZE:
-            self.warn("Radius {} was passed to get_locations_in_range. Expected integer between 0 and {}".format(radius, self.ARENA_SIZE))
+            self.warn(
+                f"""Radius {radius} was passed to get_locations_in_range.
+                Expected integer between 0 and {self.ARENA_SIZE}"""
+            )
         if not self.in_arena_bounds(location):
             self._invalid_coordinates(location)
 
@@ -212,7 +219,10 @@ class GameMap:
             for j in range(int(y - search_radius), int(y + search_radius + 1)):
                 new_location = [i, j]
                 # A unit with a given range affects all locations who's centers are within that range + get hit radius
-                if self.in_arena_bounds(new_location) and self.distance_between_locations(location, new_location) < radius + getHitRadius:
+                if (
+                    self.in_arena_bounds(new_location)
+                    and self.distance_between_locations(location, new_location) < radius + getHitRadius
+                ):
                     locations.append(new_location)
         return locations
 
@@ -227,6 +237,7 @@ class GameMap:
             The euclidean distance between the two locations
 
         """
+        # pylint: disable=invalid-name
         x1, y1 = location_1
         x2, y2 = location_2
 
