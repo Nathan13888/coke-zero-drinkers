@@ -70,13 +70,12 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # Walls of initial structure
         left_ledge = [[0, 13], [1, 13], [3, 13]] # LEFT FRONT
-        right_ledge = [[22, 13], [23, 13], [24, 13], [25, 13], [26, 13], [27, 13]] # RIGHT FRONT
+        right_ledge = [[27, 13], [26, 13], [25, 13], [24, 13], [23, 13]] # RIGHT FRONT
         left_flank = [[1, 12], [2, 12], [3, 11], [4, 10], [5, 9], [6, 8], [7, 7]] # LEFT WALL
         right_flank = [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6], [8, 6]] # RIGHT WALL
         belly = [[9, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5]] # BOTTOM FLAT PART
         initial_walls = [*left_ledge, *right_ledge, *left_flank, *belly, *right_flank]
-        # TODO: Flank walls
-        # flank_walls = [[x + 19, 13] for x in range(4)]
+        guide_walls = [[22, 13], [22, 12], *[[21 - x, 13] for x in range(3)]] # GUIDE + EXTRA TURRET POTECTION
 
         # Upgraded turrets of initial structure
         initial_upgraded_turrets = [[2, 13], [22, 10]]
@@ -98,23 +97,25 @@ class AlgoStrategy(gamelib.AlgoCore):
             (SUPPORT, [[24, 11]], "BUILD"),
 
             # Upgrade initial structure
+            (TURRET, guide_walls, "BUILD_UPGRADE"),
             (TURRET, initial_turrets, "BUILD_UPGRADE"),
             (WALL, right_ledge, "BUILD_UPGRADE"),
             (SUPPORT, [[24, 11]], "BUILD_UPGRADE"),
             (SUPPORT, [[24, 10]], "BUILD_UPGRADE"),
-            # TODO: flank (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD_UPGRADE"),
 
             # Late game (lots of resources)
-            (WALL, [[23, 13], [24, 13], [3, 13]], "BUILD_UPGRADE"),
-            (WALL, [[21, 10], [20, 9], [19, 8], [18, 7], [17, 6]], "BUILD_UPGRADE"),
+            (WALL, right_ledge, "BUILD_UPGRADE"),
+            (WALL, left_ledge, "BUILD_UPGRADE"),
+            (WALL, right_flank, "BUILD_UPGRADE"),
             (SUPPORT, [[20, 10]], "BUILD_UPGRADE"),
-            (TURRET, [[20, 8], [25, 13]], "BUILD_UPGRADE"),
 
-            # Build and upgrade final upgrades
+            # Build and upgrade final upgrades, complete surrounding
             (SUPPORT, [[19, 7]], "BUILD_UPGRADE"),
-            (WALL, [[22, 13], [21, 13], [20, 13], [19, 13]], "BUILD"),
             (TURRET, surround1_turrets, "BUILD"),
+            (WALL, left_flank, "BUILD_UPGRADE"),
             (TURRET, surround2_turrets, "BUILD"),
+            (WALL, belly, "BUILD_UPGRADE"),
+
             (TURRET, surround1_turrets, "BUILD_UPGRADES"),
             (TURRET, surround2_turrets, "BUILD_UPGRADES"),
         ]
@@ -408,6 +409,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         detected_enemy_units_threshold = 8
         stall_turns = 1
         min_spam_scout_threshold = 5
+        spam_scout_threshold = 30
         def_spawn_loc = [22, 8]
         # TODO: check if spawn loc has shit
         saved_mp = 4
@@ -436,7 +438,8 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # TODO: consider all paths to spawn
 
-        if ( # they are vulnerable??
+        if (mobile_budget >= spam_scout_threshold or
+            (# they are vulnerable??
             # if they have fewer than the threshold number of structures
             self.detect_enemy_unit(
                 game_state, unit_type=None,
@@ -452,6 +455,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             < detected_enemy_units_threshold
             and mobile_budget >= min_spam_scout_threshold
             and opponent_sp < opp_sp_min_threshold
+            )
         ):
 
             # TODO: sort out demolisher_line_strategy
@@ -479,13 +483,17 @@ class AlgoStrategy(gamelib.AlgoCore):
         # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
         # - spawn scouts every odd turn
         # - spam to protect self
-        cost_of_interceptor = 2 # TODO: get from config
+        # cost_of_interceptor = 2 # TODO: get from config
 
-        mid_spawn_loc = [20, 6]
+        # mid_spawn_loc = [20, 6]
         rear_spawn_loc = [18, 4]
 
-        game_state.attempt_spawn(INTERCEPTOR, mid_spawn_loc, 1)
-        game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp - cost_of_interceptor)
+        # game_state.attempt_spawn(INTERCEPTOR, mid_spawn_loc, 1)
+        # game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp - cost_of_interceptor)
+        # TODO: revisit effectiveness of interceptors
+        game_state.attempt_spawn(SCOUT, rear_spawn_loc, saved_mp)
+        
+        # TODO: log this??
         
 
 
